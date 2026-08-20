@@ -43,7 +43,7 @@
     </style>
 </head>
 <body>
-    <h1>🎨 Kuis Bocah Wigati</h1>
+    <h1>🎨 Kuis Seni Budaya</h1>
 
     <!-- Halaman Utama / Login Siswa -->
     <div id="login-section" class="card animasi">
@@ -97,7 +97,7 @@
         <input type="text" id="adm-opsib" placeholder="Opsi B">
         <input type="text" id="adm-opsic" placeholder="Opsi C">
         <input type="text" id="adm-opsid" placeholder="Opsi D">
-        <input type="text" id="adm-kunci" placeholder="Kunci Jawaban (harus sama persis dengan salah satu opsi)">
+        <input type="text" id="adm-kunci" placeholder="Kunci Jawaban (kata kunci, misal: Kawung)">
         <button onclick="simpanSoalBaru()">💾 Simpan Soal ke Sheets</button>
         <button class="btn-secondary" onclick="kembaliKeHome()">Keluar Panel</button>
     </div>
@@ -270,7 +270,11 @@
             document.getElementById('progress-bar').style.width = persentase + '%';
 
             const item = dataSoal[index];
-            let imgTag = (item.gambar && item.gambar.trim() !== '') ? `<img src="${item.gambar}" alt="Ilustrasi">` : '';
+            
+            let imgTag = '';
+            if (item.gambar && item.gambar.trim() !== '' && item.gambar.toLowerCase() !== 'undefined') {
+                imgTag = `<img src="${item.gambar}" alt="Ilustrasi">`;
+            }
 
             let html = `
                 <div class="card animasi">
@@ -312,9 +316,13 @@
             labels.forEach(label => {
                 const radio = label.querySelector('input');
                 radio.disabled = true;
-                if (radio.value.trim() === kunciJawaban) {
+                
+                const nilaiRadio = radio.value.trim();
+                const apakahIniKunci = nilaiRadio.toLowerCase().includes(kunciJawaban.toLowerCase());
+                
+                if (apakahIniKunci) {
                     label.classList.add('correct');
-                } else if (radio === element && pilihanSiswa !== kunciJawaban) {
+                } else if (radio === element && !apakahIniKunci) {
                     label.classList.add('incorrect');
                 }
             });
@@ -335,9 +343,16 @@
         function hitungDanKirimHasil() {
             let totalBenar = 0;
             const poinPerSoal = 100 / dataSoal.length;
+            
             dataSoal.forEach((item, index) => {
-                if (jawabanSiswa[index] === item.kunci.trim()) totalBenar++;
+                let jwbSiswa = (jawabanSiswa[index] || "").trim().toLowerCase();
+                let kunci = item.kunci.trim().toLowerCase();
+                
+                if (jwbSiswa && jwbSiswa.includes(kunci)) {
+                    totalBenar++;
+                }
             });
+            
             const skorAkhir = totalBenar * poinPerSoal;
 
             document.getElementById('quiz-section').classList.add('hidden');
