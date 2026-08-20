@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kuis Interaktif Wigati</title>
+    <title>Kuis Seni Budaya</title>
     <style>
         body { 
             font-family: 'Segoe UI', Tahoma, sans-serif; 
@@ -12,7 +12,7 @@
             max-width: 500px; 
             margin: auto; 
         }
-        h1 { 
+        h1, h3 { 
             color: #2c3e50; 
             text-align: center; 
         }
@@ -66,22 +66,44 @@
             cursor: pointer; 
             transition: background 0.3s;
             font-weight: bold;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
         button:hover { 
             background-color: #2ecc71; 
+        }
+        /* Style Tabel Leaderboard */
+        .leaderboard-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-top: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        th {
+            color: #2c3e50;
         }
         @keyframes fadeIn { 
             from { opacity: 0; } 
             to { opacity: 1; } 
         }
-        #app { 
+        #app, .leaderboard-card { 
             animation: fadeIn 0.8s ease-in-out; 
         }
     </style>
 </head>
 <body>
-    <h1>🎨 Kuis Interaktif Wigati</h1>
+    <h1>🎨 Kuis Seni Budaya</h1>
     
     <div class="input-group">
         <input type="text" id="nama" placeholder="Nama Lengkap" required>
@@ -92,12 +114,29 @@
     
     <button onclick="kirimHasil()">🚀 Selesai & Kirim</button>
 
+    <!-- Kartu Leaderboard -->
+    <div class="leaderboard-card">
+        <h3>🏆 Peringkat Teratas</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nama</th>
+                    <th>Kelas</th>
+                    <th>Skor</th>
+                </tr>
+            </thead>
+            <tbody id="isi-leaderboard">
+                <tr><td colspan="3" style="text-align: center; color: #888;">Memuat peringkat...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
     <script>
         // GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
         const API_URL = 'https://script.google.com/macros/s/AKfycbwCQiAcQz_oGypiruMPdNnpBhcdjPbwADx_jHxBGxi8zFXJhzLzCs2tdyp1CucyNvEF/exec';
         let dataSoal = [];
 
-        // 1. Mengambil data soal dari Apps Script
+        // 1. Ambil Data Soal
         fetch(API_URL)
             .then(response => response.json())
             .then(data => {
@@ -105,7 +144,6 @@
                 let html = '';
                 
                 data.forEach((item, index) => {
-                    // Cek apakah link gambar tersedia dan tidak kosong
                     let imgTag = '';
                     if (item.gambar && item.gambar.trim() !== '') {
                         imgTag = `<img src="${item.gambar}" alt="Ilustrasi Soal">`;
@@ -124,10 +162,34 @@
                 document.getElementById('app').innerHTML = html;
             })
             .catch(error => {
-                document.getElementById('app').innerHTML = '<p style="text-align:center; color:red;">Gagal memuat soal. Periksa kembali URL API Anda.</p>';
+                document.getElementById('app').innerHTML = '<p style="text-align:center; color:red;">Gagal memuat soal.</p>';
             });
 
-        // 2. Logika Menghitung Skor dan Mengirim Hasil
+        // 2. Ambil Data Leaderboard
+        function muatLeaderboard() {
+            fetch(API_URL + '?mode=leaderboard')
+                .then(res => res.json())
+                .then(data => {
+                    let rows = '';
+                    if (data.length === 0) {
+                        rows = '<tr><td colspan="3" style="text-align: center; color: #888;">Belum ada data skor.</td></tr>';
+                    } else {
+                        // Tampilkan maksimal 5 skor teratas
+                        data.slice(0, 5).forEach(item => {
+                            rows += `<tr><td>${item.nama}</td><td>${item.kelas}</td><td><strong>${item.skor}</strong></td></tr>`;
+                        });
+                    }
+                    document.getElementById('isi-leaderboard').innerHTML = rows;
+                })
+                .catch(error => {
+                    document.getElementById('isi-leaderboard').innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Gagal memuat peringkat.</td></tr>';
+                });
+        }
+
+        // Panggil fungsi leaderboard saat halaman dimuat
+        muatLeaderboard();
+
+        // 3. Logika Hitung Skor & Kirim Hasil
         function kirimHasil() {
             const nama = document.getElementById('nama').value.trim();
             const kelas = document.getElementById('kelas').value.trim();
@@ -140,7 +202,6 @@
             let totalBenar = 0;
             const poinPerSoal = 100 / dataSoal.length;
 
-            // Membandingkan jawaban pilihan siswa dengan Kunci Jawaban di Sheets
             dataSoal.forEach((item, index) => {
                 const pilihan = document.querySelector(`input[name="soal${index}"]:checked`);
                 if (pilihan && pilihan.value.trim() === item.kunci.trim()) {
@@ -150,7 +211,6 @@
 
             const skorAkhir = totalBenar * poinPerSoal;
 
-            // Mengirim data ke Google Sheets via POST
             const payload = {
                 nama: nama,
                 kelas: kelas,
@@ -163,6 +223,8 @@
                 body: JSON.stringify(payload)
             }).then(() => {
                 alert(`Kuis Selesai!\n\nNama: ${nama}\nKelas: ${kelas}\nSkor Anda: ${skorAkhir}`);
+                // Refresh leaderboard setelah beberapa detik agar data baru masuk
+                setTimeout(muatLeaderboard, 2000);
             }).catch(error => {
                 alert("Terjadi kesalahan saat mengirim skor.");
             });
