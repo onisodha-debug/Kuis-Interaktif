@@ -74,6 +74,14 @@
         button:hover { 
             background-color: #2ecc71; 
         }
+        /* Tombol Sekunder untuk Leaderboard */
+        .btn-secondary {
+            background-color: #3498db;
+            margin-bottom: 20px;
+        }
+        .btn-secondary:hover {
+            background-color: #2980b9;
+        }
         .hidden {
             display: none;
         }
@@ -113,20 +121,11 @@
         <button onclick="mulaiKuis()">Mulai Kuis 🚀</button>
     </div>
 
-    <!-- Bagian Kuis (Tampil Satu per Satu) -->
-    <div id="quiz-section" class="hidden">
-        <div id="soal-container"></div>
-        <button id="btn-lanjut" onclick="prosesJawaban()" class="hidden">Soal Berikutnya ➡️</button>
-    </div>
+    <!-- Tombol untuk Membuka Peringkat -->
+    <button id="btn-toggle-leaderboard" class="btn-secondary" onclick="toggleLeaderboard()">🏆 Tampilkan Peringkat</button>
 
-    <!-- Bagian Hasil Akhir -->
-    <div id="result-section" class="hidden selesai-card animasi-transisi" style="text-align: center;">
-        <h2>🎉 Kuis Selesai!</h2>
-        <p id="hasil-teks" style="font-size: 18px; margin: 20px 0;"></p>
-    </div>
-
-    <!-- Kartu Leaderboard -->
-    <div class="leaderboard-card animasi-transisi">
+    <!-- Kartu Leaderboard (Awalnya Disembunyikan) -->
+    <div id="leaderboard-card" class="leaderboard-card animasi-transisi hidden">
         <h3>🏆 Peringkat Teratas</h3>
         <table>
             <thead>
@@ -142,6 +141,19 @@
         </table>
     </div>
 
+    <!-- Bagian Kuis (Tampil Satu per Satu) -->
+    <div id="quiz-section" class="hidden">
+        <div id="soal-container"></div>
+        <button id="btn-lanjut" onclick="prosesJawaban()" class="hidden">Soal Berikutnya ➡️</button>
+    </div>
+
+    <!-- Bagian Hasil Akhir -->
+    <div id="result-section" class="hidden selesai-card animasi-transisi" style="text-align: center;">
+        <h2>🎉 Kuis Selesai!</h2>
+        <p id="hasil-teks" style="font-size: 18px; margin: 20px 0;"></p>
+        <button onclick="location.reload()">Ulangi Kuis 🔄</button>
+    </div>
+
     <script>
         // GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
         const API_URL = 'https://script.google.com/macros/s/AKfycbwCQiAcQz_oGypiruMPdNnpBhcdjPbwADx_jHxBGxi8zFXJhzLzCs2tdyp1CucyNvEF/exec';
@@ -151,7 +163,7 @@
         let namaSiswa = '';
         let kelasSiswa = '';
 
-        // 1. Ambil Data Soal dari Google Sheets saat halaman dibuka
+        // 1. Ambil Data Soal dari Google Sheets
         fetch(API_URL)
             .then(response => response.json())
             .then(data => {
@@ -179,7 +191,22 @@
         }
         muatLeaderboard();
 
-        // 3. Mulai Kuis setelah mengisi nama & kelas
+        // 3. Fungsi untuk Buka-Tutup (Toggle) Tampilan Leaderboard
+        function toggleLeaderboard() {
+            const lbCard = document.getElementById('leaderboard-card');
+            const btnLb = document.getElementById('btn-toggle-leaderboard');
+            
+            if (lbCard.classList.contains('hidden')) {
+                lbCard.classList.remove('hidden');
+                btnLb.innerHTML = "❌ Sembunyikan Peringkat";
+                muatLeaderboard(); // Perbarui data saat dibuka
+            } else {
+                lbCard.classList.add('hidden');
+                btnLb.innerHTML = "🏆 Tampilkan Peringkat";
+            }
+        }
+
+        // 4. Mulai Kuis setelah mengisi nama & kelas
         function mulaiKuis() {
             namaSiswa = document.getElementById('nama').value.trim();
             kelasSiswa = document.getElementById('kelas').value.trim();
@@ -194,14 +221,16 @@
                 return;
             }
 
-            // Sembunyikan form login, tampilkan area kuis
+            // Sembunyikan form login & tombol leaderboard, tampilkan area kuis
             document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('btn-toggle-leaderboard').classList.add('hidden');
+            document.getElementById('leaderboard-card').classList.add('hidden');
             document.getElementById('quiz-section').classList.remove('hidden');
             
             tampilkanSoal(indeksSoalAktif);
         }
 
-        // 4. Render Soal Satu per Satu dengan Animasi
+        // 5. Render Soal Satu per Satu dengan Animasi
         function tampilkanSoal(index) {
             const item = dataSoal[index];
             let imgTag = '';
@@ -222,16 +251,14 @@
             `;
 
             document.getElementById('soal-container').innerHTML = html;
-            // Sembunyikan tombol lanjut sampai siswa memilih salah satu opsi
             document.getElementById('btn-lanjut').classList.add('hidden');
         }
 
-        // Munculkan tombol lanjut begitu opsi diklik
         function tampilkanTombolLanjut() {
             document.getElementById('btn-lanjut').classList.remove('hidden');
         }
 
-        // 5. Proses Jawaban & Pindah ke Soal Berikutnya / Selesai
+        // 6. Proses Jawaban & Pindah Soal
         function prosesJawaban() {
             const pilihanDipilih = document.querySelector('input[name="pilihan"]:checked');
             if (!pilihanDipilih) {
@@ -239,21 +266,17 @@
                 return;
             }
 
-            // Simpan jawaban siswa
             jawabanSiswa.push(pilihanDipilih.value.trim());
-
             indeksSoalAktif++;
 
             if (indeksSoalAktif < dataSoal.length) {
-                // Lanjut ke soal berikutnya dengan animasi
                 tampilkanSoal(indeksSoalAktif);
             } else {
-                // Jika soal habis, hitung skor dan kirim ke server
                 hitungDanKirimHasil();
             }
         }
 
-        // 6. Hitung Skor & Kirim ke Google Sheets
+        // 7. Hitung Skor & Kirim ke Google Sheets
         function hitungDanKirimHasil() {
             let totalBenar = 0;
             const poinPerSoal = 100 / dataSoal.length;
@@ -266,13 +289,11 @@
 
             const skorAkhir = totalBenar * poinPerSoal;
 
-            // Sembunyikan area kuis, tampilkan kartu selesai
             document.getElementById('quiz-section').classList.add('hidden');
             const resultSection = document.getElementById('result-section');
             resultSection.classList.remove('hidden');
             document.getElementById('hasil-teks').innerHTML = `Halo <strong>${namaSiswa}</strong> (${kelasSiswa}),<br> Skor akhir Anda adalah: <span style="font-size: 28px; color: #27ae60; font-weight: bold;">${skorAkhir}</span>`;
 
-            // Kirim data ke Google Sheets
             const payload = {
                 nama: namaSiswa,
                 kelas: kelasSiswa,
@@ -284,7 +305,6 @@
                 mode: 'no-cors',
                 body: JSON.stringify(payload)
             }).then(() => {
-                // Perbarui leaderboard setelah data masuk
                 setTimeout(muatLeaderboard, 1500);
             });
         }
