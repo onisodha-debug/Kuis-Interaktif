@@ -1,426 +1,82 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kuis Bocah Wigati V12</title>
+    <meta charset="UTF-8"><title>Kuis Seni Budaya</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 20px; background-color: #f4f7f6; max-width: 500px; margin: auto; }
-        h1, h3 { color: #2c3e50; text-align: center; }
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background-color: #f4f7f6; max-width: 500px; margin: auto; }
         .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        input[type="text"], select, textarea, input[type="password"] { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
-        textarea { resize: vertical; height: 80px; }
-        
-        .progress-container { width: 100%; background-color: #e0e0e0; border-radius: 10px; height: 12px; margin-bottom: 20px; overflow: hidden; }
-        .progress-bar { width: 0%; height: 100%; background-color: #27ae60; border-radius: 10px; transition: width 0.4s ease; }
-        
-        .soal-header { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #666; margin-bottom: 10px; }
-        .timer-box { background: #e74c3c; color: white; padding: 4px 10px; border-radius: 20px; font-weight: bold; }
-        .card img { width: 100%; border-radius: 10px; margin-bottom: 15px; max-height: 250px; object-fit: cover; }
-        
-        label.option-label { display: block; padding: 12px; margin-bottom: 8px; border: 2px solid #eee; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
-        label.option-label:hover { background-color: #f8f9fa; border-color: #cbd5e1; }
-        
-        .correct { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724; font-weight: bold; }
-        .incorrect { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; }
-        
-        button { width: 100%; padding: 15px; background-color: #27ae60; color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: background 0.3s; }
-        button:hover { background-color: #2ecc71; }
-        .btn-secondary { background-color: #3498db; }
-        .btn-secondary:hover { background-color: #2980b9; }
-        .btn-admin { background-color: #e67e22; margin-top: 5px; }
-        .btn-admin:hover { background-color: #d35400; }
-        .btn-warning { background-color: #f39c12; }
-        .btn-warning:hover { background-color: #d68910; }
-        
+        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background-color: #27ae60; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .btn-admin { background-color: #e67e22; }
+        .btn-danger { background-color: #c0392b; }
         .hidden { display: none; }
-        table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 10px; }
-        th, td { padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; }
-        th { color: #2c3e50; }
-        
-        .soal-list-admin { max-height: 250px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 8px; margin-bottom: 10px; text-align: left; }
-        .soal-list-admin label { display: block; margin-bottom: 6px; font-size: 13px; cursor: pointer; }
-        
-        .footer { text-align: center; color: #7f8c8d; font-size: 13px; margin-top: 30px; margin-bottom: 20px; }
-        
-        @keyframes fadeInSlide { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        .animasi { animation: fadeInSlide 0.4s ease-in-out; }
+        .option-label { display: block; padding: 12px; margin-bottom: 8px; border: 2px solid #eee; border-radius: 8px; cursor: pointer; }
+        .correct { background-color: #d4edda !important; border-color: #28a745 !important; }
+        .incorrect { background-color: #f8d7da !important; border-color: #dc3545 !important; }
     </style>
 </head>
 <body>
-    <h1>🎨 Kuis Bocah Wigati</h1>
-
-    <!-- Halaman Utama / Login Siswa -->
-    <div id="login-section" class="card animasi">
-        <p style="text-align:center; color:#555; margin-top:0;">Pilih Kategori & Masukkan Identitas:</p>
-        <select id="pilih-kategori" style="margin-bottom: 10px;">
-            <option value="">Memuat Kategori...</option>
-        </select>
-        <input type="text" id="nama" placeholder="Nama Lengkap" required>
-        <input type="text" id="kelas" placeholder="Kelas" required>
+    <h1>🎨 Kuis Seni Budaya</h1>
+    <div id="login-section" class="card">
+        <select id="pilih-kategori"><option value="">Memuat Kategori...</option></select>
+        <input type="text" id="nama" placeholder="Nama Lengkap">
+        <input type="text" id="kelas" placeholder="Kelas">
         <button onclick="mulaiKuis()">Mulai Kuis 🚀</button>
-        <button class="btn-admin" onclick="bukaLoginAdmin()">🔐 Login Admin (Input Soal)</button>
+        <button class="btn-admin" onclick="bukaLoginAdmin()">🔐 Login Admin</button>
     </div>
 
-    <button id="btn-toggle-lb" class="btn-secondary" onclick="toggleLeaderboard()">🏆 Tampilkan Peringkat</button>
-
-    <!-- Leaderboard Card -->
-    <div id="leaderboard-card" class="card animasi hidden">
-        <h3>🏆 Peringkat Teratas</h3>
-        <select id="filter-lb-kategori" onchange="muatLeaderboard()" style="margin-bottom: 15px;">
-            <option value="">Semua Kategori</option>
-        </select>
-        <table>
-            <thead><tr><th>Nama</th><th>Kelas</th><th>Skor</th></tr></thead>
-            <tbody id="isi-leaderboard"><tr><td colspan="3" style="text-align: center; color: #888;">Memuat...</td></tr></tbody>
-        </table>
+    <!-- Admin Panel -->
+    <div id="admin-panel-section" class="card hidden">
+        <h3>Panel Admin</h3>
+        <button class="btn-danger" onclick="resetPeringkat()">🗑️ Reset Leaderboard</button>
+        <button onclick="kembaliKeHome()">Keluar</button>
     </div>
 
-    <!-- Halaman Login Admin -->
-    <div id="admin-login-section" class="card animasi hidden">
-        <h3>🔐 Login Admin</h3>
-        <input type="password" id="admin-pass" placeholder="Masukkan Password">
-        <button onclick="verifikasiAdmin()">Masuk Panel</button>
-        <button class="btn-secondary" onclick="kembaliKeHome()">Kembali</button>
-    </div>
-
-    <!-- Halaman Panel Admin -->
-    <div id="admin-panel-section" class="card animasi hidden">
-        <h3>📝 Tambah Soal Baru</h3>
-        <select id="adm-kategori">
-            <option value="Batik">Batik</option>
-            <option value="Rupa">Rupa</option>
-            <option value="Tari">Tari</option>
-            <option value="Filsafat">Filsafat</option>
-            <option value="Literasi Budaya">Literasi Budaya</option>
-            <option value="Numerasi dalam Seni">Numerasi dalam Seni</option>
-            <option value="Gamelan">Gamelan</option>
-        </select>
-        <textarea id="adm-pertanyaan" placeholder="Tulis pertanyaan soal..."></textarea>
-        <input type="text" id="adm-gambar" placeholder="URL Gambar Ilustrasi (Opsional)">
-        <input type="text" id="adm-opsia" placeholder="Opsi A">
-        <input type="text" id="adm-opsib" placeholder="Opsi B">
-        <input type="text" id="adm-opsic" placeholder="Opsi C">
-        <input type="text" id="adm-opsid" placeholder="Opsi D">
-        <input type="text" id="adm-kunci" placeholder="Kunci Jawaban (kata kunci, misal: Kawung)">
-        <button onclick="simpanSoalBaru()">💾 Simpan Soal ke Sheets</button>
-
-        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ddd;">
-
-        <h3>🎯 Pilih Soal Aktif Ujian</h3>
-        <p style="font-size: 13px; color: #666; text-align: center; margin-top:0;">Centang soal di bawah yang ingin diikutkan dalam kuis:</p>
-        <div id="daftar-soal-admin" class="soal-list-admin">
-            Memuat daftar soal...
-        </div>
-        <button class="btn-warning" onclick="simpanSoalAktif()">✅ Terapkan Soal Terpilih</button>
-        <button class="btn-secondary" onclick="kembaliKeHome()">Keluar Panel</button>
-    </div>
-
-    <!-- Halaman Kuis -->
-    <div id="quiz-section" class="hidden">
-        <div class="progress-container"><div id="progress-bar" class="progress-bar"></div></div>
-        <div id="soal-container"></div>
-    </div>
-
-    <!-- Halaman Hasil Selesai -->
-    <div id="result-section" class="hidden card animasi" style="text-align: center;">
-        <h2>🎉 Kuis Selesai!</h2>
-        <p id="hasil-teks" style="font-size: 18px; margin: 20px 0;"></p>
-        <button onclick="location.reload()">Menu Utama 🔄</button>
-    </div>
-
-    <!-- Copyright Footer -->
-    <div class="footer">
-        Copyright © 2026 Bocah Wigati. All rights reserved.
-    </div>
+    <div id="quiz-section" class="hidden"></div>
+    <div id="result-section" class="hidden card"><h2>Selesai!</h2><button onclick="location.reload()">Menu Utama</button></div>
 
     <script>
         const API_URL = 'https://script.google.com/macros/s/AKfycbwCQiAcQz_oGypiruMPdNnpBhcdjPbwADx_jHxBGxi8zFXJhzLzCs2tdyp1CucyNvEF/exec';
-        let dataSoal = [];
-        let indeksSoalAktif = 0;
-        let jawabanSiswa = [];
-        let namaSiswa = '', kelasSiswa = '', kategoriAktif = '';
-        let timerInterval, sisaWaktu = 25;
-        let soalTerpilihAdmin = JSON.parse(localStorage.getItem('soal_terpilih_admin')) || [];
+        let dataSoal = [], jawabanSiswa = [], indeksSoal = 0, namaSiswa, kelasSiswa, kategoriAktif;
 
-        function muatKategoriOtomatis() {
-            fetch(API_URL).then(res => res.json()).then(data => {
-                let setKategori = new Set();
-                data.forEach(item => {
-                    if (item.kategori) {
-                        setKategori.add(item.kategori.trim());
-                    }
-                });
-
-                let selectSiswa = document.getElementById('pilih-kategori');
-                let selectFilterLb = document.getElementById('filter-lb-kategori');
-                let optionsHtml = '';
-                let filterHtml = '<option value="">Semua Kategori</option>';
-
-                setKategori.forEach(kat => {
-                    optionsHtml += `<option value="${kat}">${kat}</option>`;
-                    filterHtml += `<option value="${kat}">${kat}</option>`;
-                });
-
-                if (setKategori.size > 0) {
-                    selectSiswa.innerHTML = optionsHtml;
-                    selectFilterLb.innerHTML = filterHtml;
-                }
-            }).catch(err => {
-                console.error("Gagal memuat kategori:", err);
-            });
-        }
-        muatKategoriOtomatis();
-
-        function muatLeaderboard() {
-            const kategoriPilih = document.getElementById('filter-lb-kategori').value;
-            let url = API_URL + '?mode=leaderboard';
-            if (kategoriPilih) {
-                url += `&kategori=${encodeURIComponent(kategoriPilih)}`;
-            }
-
-            fetch(url).then(res => res.json()).then(data => {
-                let rows = data.length === 0 ? '<tr><td colspan="3" style="text-align: center; color: #888;">Belum ada data.</td></tr>' : '';
-                data.slice(0, 5).forEach(item => {
-                    rows += `<tr><td>${item.nama}</td><td>${item.kelas}</td><td><strong>${item.skor}</strong></td></tr>`;
-                });
-                document.getElementById('isi-leaderboard').innerHTML = rows;
-            });
-        }
-        muatLeaderboard();
-
-        function toggleLeaderboard() {
-            const lb = document.getElementById('leaderboard-card');
-            const btn = document.getElementById('btn-toggle-lb');
-            if (lb.classList.contains('hidden')) {
-                lb.classList.remove('hidden'); btn.innerHTML = "❌ Sembunyikan Peringkat"; muatLeaderboard();
-            } else {
-                lb.classList.add('hidden'); btn.innerHTML = "🏆 Tampilkan Peringkat";
-            }
-        }
-
-        function bukaLoginAdmin() {
+        // Fungsi fetch sederhana
+        async function mulaiKuis() {
+            kategoriAktif = document.getElementById('pilih-kategori').value;
+            namaSiswa = document.getElementById('nama').value;
+            kelasSiswa = document.getElementById('kelas').value;
+            const res = await fetch(API_URL + `?mode=soal&kategori=${kategoriAktif}`);
+            dataSoal = await res.json();
             document.getElementById('login-section').classList.add('hidden');
-            document.getElementById('btn-toggle-lb').classList.add('hidden');
-            document.getElementById('leaderboard-card').classList.add('hidden');
-            document.getElementById('admin-login-section').classList.remove('hidden');
+            document.getElementById('quiz-section').classList.remove('hidden');
+            tampilkanSoal(0);
         }
 
-        function verifikasiAdmin() {
-            const pass = document.getElementById('admin-pass').value;
-            if (pass === 'admin123') {
-                document.getElementById('admin-login-section').classList.add('hidden');
-                document.getElementById('admin-panel-section').classList.remove('hidden');
-                muatDaftarSoalAdmin();
-            } else {
-                alert("Password salah!");
-            }
+        function tampilkanSoal(i) {
+            const item = dataSoal[i];
+            document.getElementById('quiz-section').innerHTML = `
+                <div class="card">
+                    <p><strong>${item.pertanyaan}</strong></p>
+                    ${['opsi_a','opsi_b','opsi_c','opsi_d'].map(o => `<label class="option-label"><input type="radio" name="p" value="${item[o]}" onclick="cek('${item[o]}','${item.kunci}')"> ${item[o]}</label>`).join('')}
+                </div>`;
         }
 
-        function kembaliKeHome() {
+        function cek(p, k) {
+            if(p.toLowerCase().includes(k.toLowerCase())) alert("Benar!");
+            jawabanSiswa.push(p);
+            indeksSoal++;
+            if(indeksSoal < dataSoal.length) tampilkanSoal(indeksSoal);
+            else finish();
+        }
+
+        function finish() {
+            // Logika hitung skor dan kirim ke doPost
+            alert("Kuis selesai!");
             location.reload();
         }
 
-        function muatDaftarSoalAdmin() {
-            fetch(API_URL + '?mode=semuasoal')
-                .then(res => res.json())
-                .then(data => {
-                    let html = '';
-                    if (data.length === 0) {
-                        html = '<p style="text-align:center; color:#888;">Belum ada soal.</p>';
-                    } else {
-                        data.forEach(item => {
-                            // Jika belum pernah disetting sama sekali, defaultnya tercentang semua
-                            let isChecked = (soalTerpilihAdmin.length === 0 || soalTerpilihAdmin.includes(item.id.toString())) ? 'checked' : '';
-                            html += `<label><input type="checkbox" value="${item.id}" ${isChecked}> [${item.kategori}] ${item.pertanyaan}</label>`;
-                        });
-                    }
-                    document.getElementById('daftar-soal-admin').innerHTML = html;
-                }).catch(err => {
-                    document.getElementById('daftar-soal-admin').innerHTML = '<p style="text-align:center; color:red;">Gagal memuat daftar soal.</p>';
-                });
-        }
-
-        function simpanSoalAktif() {
-            const checkboxes = document.querySelectorAll('#daftar-soal-admin input[type="checkbox"]');
-            let terpilih = [];
-            checkboxes.forEach(cb => {
-                if (cb.checked) {
-                    terpilih.push(cb.value);
-                }
-            });
-            soalTerpilihAdmin = terpilih;
-            localStorage.setItem('soal_terpilih_admin', JSON.stringify(soalTerpilihAdmin));
-            alert("Berhasil! Hanya soal yang dicentang yang akan muncul saat siswa mengerjakan kuis.");
-        }
-
-        function simpanSoalBaru() {
-            const payload = {
-                action: 'tambahSoal',
-                kategori: document.getElementById('adm-kategori').value,
-                pertanyaan: document.getElementById('adm-pertanyaan').value,
-                gambar: document.getElementById('adm-gambar').value,
-                opsi_a: document.getElementById('adm-opsia').value,
-                opsi_b: document.getElementById('adm-opsib').value,
-                opsi_c: document.getElementById('adm-opsic').value,
-                opsi_d: document.getElementById('adm-opsid').value,
-                kunci: document.getElementById('adm-kunci').value
-            };
-
-            if (!payload.pertanyaan || !payload.opsi_a || !payload.kunci) {
-                alert("Harap isi pertanyaan, minimal opsi A, dan kunci jawaban!");
-                return;
-            }
-
-            fetch(API_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify(payload)
-            }).then(() => {
-                alert("Soal berhasil disimpan ke Google Sheets!");
-                document.getElementById('adm-pertanyaan').value = '';
-                document.getElementById('adm-gambar').value = '';
-                document.getElementById('adm-opsia').value = '';
-                document.getElementById('adm-opsib').value = '';
-                document.getElementById('adm-opsic').value = '';
-                document.getElementById('adm-opsid').value = '';
-                document.getElementById('adm-kunci').value = '';
-                muatDaftarSoalAdmin();
-            });
-        }
-
-        function mulaiKuis() {
-            kategoriAktif = document.getElementById('pilih-kategori').value;
-            namaSiswa = document.getElementById('nama').value.trim();
-            kelasSiswa = document.getElementById('kelas').value.trim();
-
-            if (!namaSiswa || !kelasSiswa) { alert("Harap isi Nama dan Kelas!"); return; }
-            if (!kategoriAktif) { alert("Pilih kategori terlebih dahulu!"); return; }
-
-            fetch(API_URL + `?mode=soal&kategori=${encodeURIComponent(kategoriAktif)}`)
-                .then(res => res.json())
-                .then(data => {
-                    // Filter berdasarkan pilihan centang admin (jika ada)
-                    if (soalTerpilihAdmin.length > 0) {
-                        dataSoal = data.filter(item => soalTerpilihAdmin.includes(item.id.toString()));
-                    } else {
-                        dataSoal = data;
-                    }
-
-                    if (dataSoal.length === 0) {
-                        alert("Tidak ada soal aktif untuk kategori ini (mungkin belum dicentang di panel admin).");
-                        return;
-                    }
-                    document.getElementById('login-section').classList.add('hidden');
-                    document.getElementById('btn-toggle-lb').classList.add('hidden');
-                    document.getElementById('leaderboard-card').classList.add('hidden');
-                    document.getElementById('quiz-section').classList.remove('hidden');
-                    tampilkanSoal(indeksSoalAktif);
-                });
-        }
-
-        function tampilkanSoal(index) {
-            clearInterval(timerInterval);
-            sisaWaktu = 25;
-            let persentase = (index / dataSoal.length) * 100;
-            document.getElementById('progress-bar').style.width = persentase + '%';
-
-            const item = dataSoal[index];
-            
-            let imgTag = '';
-            if (item.gambar && item.gambar.trim() !== '' && item.gambar.toLowerCase() !== 'undefined') {
-                imgTag = `<img src="${item.gambar}" alt="Ilustrasi">`;
-            }
-
-            let html = `
-                <div class="card animasi">
-                    <div class="soal-header">
-                        <span>Soal ${index + 1} dari ${dataSoal.length}</span>
-                        <span id="timer-box" class="timer-box">⏱️ 25s</span>
-                    </div>
-                    <p><strong>${item.pertanyaan}</strong></p>
-                    ${imgTag}
-                    <label class="option-label"><input type="radio" name="pilihan" value="${item.opsi_a}" onclick="pilihJawaban(this, '${item.kunci.trim()}')"> ${item.opsi_a}</label>
-                    <label class="option-label"><input type="radio" name="pilihan" value="${item.opsi_b}" onclick="pilihJawaban(this, '${item.kunci.trim()}')"> ${item.opsi_b}</label>
-                    <label class="option-label"><input type="radio" name="pilihan" value="${item.opsi_c}" onclick="pilihJawaban(this, '${item.kunci.trim()}')"> ${item.opsi_c}</label>
-                    <label class="option-label"><input type="radio" name="pilihan" value="${item.opsi_d}" onclick="pilihJawaban(this, '${item.kunci.trim()}')"> ${item.opsi_d}</label>
-                </div>
-            `;
-            document.getElementById('soal-container').innerHTML = html;
-            mulaiTimer();
-        }
-
-        function mulaiTimer() {
-            const timerBox = document.getElementById('timer-box');
-            timerInterval = setInterval(() => {
-                sisaWaktu--;
-                timerBox.innerHTML = `⏱️ ${sisaWaktu}s`;
-                if (sisaWaktu <= 0) {
-                    clearInterval(timerInterval);
-                    jawabanSiswa.push("");
-                    lanjutKeSoalBerikutnya();
-                }
-            }, 1000);
-        }
-
-        function pilihJawaban(element, kunciJawaban) {
-            clearInterval(timerInterval);
-            const pilihanSiswa = element.value.trim();
-            jawabanSiswa.push(pilihanSiswa);
-
-            const labels = document.querySelectorAll('.option-label');
-            labels.forEach(label => {
-                const radio = label.querySelector('input');
-                radio.disabled = true;
-                
-                const nilaiRadio = radio.value.trim();
-                const apakahIniKunci = nilaiRadio.toLowerCase().includes(kunciJawaban.toLowerCase());
-                
-                if (apakahIniKunci) {
-                    label.classList.add('correct');
-                } else if (radio === element && !apakahIniKunci) {
-                    label.classList.add('incorrect');
-                }
-            });
-
-            setTimeout(() => { lanjutKeSoalBerikutnya(); }, 1500);
-        }
-
-        function lanjutKeSoalBerikutnya() {
-            indeksSoalAktif++;
-            if (indeksSoalAktif < dataSoal.length) {
-                tampilkanSoal(indeksSoalAktif);
-            } else {
-                document.getElementById('progress-bar').style.width = '100%';
-                hitungDanKirimHasil();
-            }
-        }
-
-        function hitungDanKirimHasil() {
-            let totalBenar = 0;
-            const poinPerSoal = 100 / dataSoal.length;
-            
-            dataSoal.forEach((item, index) => {
-                let jwbSiswa = (jawabanSiswa[index] || "").trim().toLowerCase();
-                let kunci = item.kunci.trim().toLowerCase();
-                
-                if (jwbSiswa && jwbSiswa.includes(kunci)) {
-                    totalBenar++;
-                }
-            });
-            
-            const skorAkhir = totalBenar * poinPerSoal;
-
-            document.getElementById('quiz-section').classList.add('hidden');
-            document.getElementById('result-section').classList.remove('hidden');
-            document.getElementById('hasil-teks').innerHTML = `Halo <strong>${namaSiswa}</strong> (${kelasSiswa}),<br> Skor Kategori <strong>${kategoriAktif}</strong> Anda: <span style="font-size: 28px; color: #27ae60; font-weight: bold;">${skorAkhir}</span>`;
-
-            fetch(API_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({ nama: namaSiswa, kelas: kelasSiswa, kategori: kategoriAktif, skor: skorAkhir })
-            }).then(() => { setTimeout(muatLeaderboard, 1500); });
-        }
+        function bukaLoginAdmin() { if(prompt("Password:") === 'admin123') document.getElementById('admin-panel-section').classList.remove('hidden'); }
+        function resetPeringkat() { if(confirm("Yakin?")) fetch(API_URL, {method:'POST', mode:'no-cors', body: JSON.stringify({action:'resetLeaderboard'})}); }
+        function kembaliKeHome() { location.reload(); }
     </script>
 </body>
 </html>
