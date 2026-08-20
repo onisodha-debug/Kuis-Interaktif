@@ -30,11 +30,16 @@
         .btn-secondary:hover { background-color: #2980b9; }
         .btn-admin { background-color: #e67e22; margin-top: 5px; }
         .btn-admin:hover { background-color: #d35400; }
+        .btn-warning { background-color: #f39c12; }
+        .btn-warning:hover { background-color: #d68910; }
         
         .hidden { display: none; }
         table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 10px; }
         th, td { padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; }
         th { color: #2c3e50; }
+        
+        .soal-list-admin { max-height: 250px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 8px; margin-bottom: 10px; text-align: left; }
+        .soal-list-admin label { display: block; margin-bottom: 6px; font-size: 13px; cursor: pointer; }
         
         .footer { text-align: center; color: #7f8c8d; font-size: 13px; margin-top: 30px; margin-bottom: 20px; }
         
@@ -43,7 +48,7 @@
     </style>
 </head>
 <body>
-    <h1>🎨 Kuis Bocah Wigati</h1>
+    <h1>🎨 Kuis Seni Budaya</h1>
 
     <!-- Halaman Utama / Login Siswa -->
     <div id="login-section" class="card animasi">
@@ -99,6 +104,15 @@
         <input type="text" id="adm-opsid" placeholder="Opsi D">
         <input type="text" id="adm-kunci" placeholder="Kunci Jawaban (kata kunci, misal: Kawung)">
         <button onclick="simpanSoalBaru()">💾 Simpan Soal ke Sheets</button>
+
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ddd;">
+
+        <h3>🎯 Pilih Soal Aktif Ujian</h3>
+        <p style="font-size: 13px; color: #666; text-align: center; margin-top:0;">Centang soal di bawah yang ingin diikutkan dalam kuis:</p>
+        <div id="daftar-soal-admin" class="soal-list-admin">
+            Memuat daftar soal...
+        </div>
+        <button class="btn-warning" onclick="simpanSoalAktif()">✅ Terapkan Soal Terpilih</button>
         <button class="btn-secondary" onclick="kembaliKeHome()">Keluar Panel</button>
     </div>
 
@@ -127,6 +141,7 @@
         let jawabanSiswa = [];
         let namaSiswa = '', kelasSiswa = '', kategoriAktif = '';
         let timerInterval, sisaWaktu = 25;
+        let soalTerpilihAdmin = JSON.parse(localStorage.getItem('soal_terpilih_admin')) || [];
 
         function muatKategoriOtomatis() {
             fetch(API_URL).then(res => res.json()).then(data => {
@@ -196,6 +211,7 @@
             if (pass === 'admin123') {
                 document.getElementById('admin-login-section').classList.add('hidden');
                 document.getElementById('admin-panel-section').classList.remove('hidden');
+                muatDaftarSoalAdmin();
             } else {
                 alert("Password salah!");
             }
@@ -203,6 +219,39 @@
 
         function kembaliKeHome() {
             location.reload();
+        }
+
+        function muatDaftarSoalAdmin() {
+            fetch(API_URL + '?mode=semuasoal')
+                .then(res => res.json())
+                .then(data => {
+                    let html = '';
+                    if (data.length === 0) {
+                        html = '<p style="text-align:center; color:#888;">Belum ada soal.</p>';
+                    } else {
+                        data.forEach(item => {
+                            // Jika belum pernah disetting sama sekali, defaultnya tercentang semua
+                            let isChecked = (soalTerpilihAdmin.length === 0 || soalTerpilihAdmin.includes(item.id.toString())) ? 'checked' : '';
+                            html += `<label><input type="checkbox" value="${item.id}" ${isChecked}> [${item.kategori}] ${item.pertanyaan}</label>`;
+                        });
+                    }
+                    document.getElementById('daftar-soal-admin').innerHTML = html;
+                }).catch(err => {
+                    document.getElementById('daftar-soal-admin').innerHTML = '<p style="text-align:center; color:red;">Gagal memuat daftar soal.</p>';
+                });
+        }
+
+        function simpanSoalAktif() {
+            const checkboxes = document.querySelectorAll('#daftar-soal-admin input[type="checkbox"]');
+            let terpilih = [];
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    terpilih.push(cb.value);
+                }
+            });
+            soalTerpilihAdmin = terpilih;
+            localStorage.setItem('soal_terpilih_admin', JSON.stringify(soalTerpilihAdmin));
+            alert("Berhasil! Hanya soal yang dicentang yang akan muncul saat siswa mengerjakan kuis.");
         }
 
         function simpanSoalBaru() {
@@ -236,6 +285,7 @@
                 document.getElementById('adm-opsic').value = '';
                 document.getElementById('adm-opsid').value = '';
                 document.getElementById('adm-kunci').value = '';
+                muatDaftarSoalAdmin();
             });
         }
 
@@ -250,9 +300,15 @@
             fetch(API_URL + `?mode=soal&kategori=${encodeURIComponent(kategoriAktif)}`)
                 .then(res => res.json())
                 .then(data => {
-                    dataSoal = data;
+                    // Filter berdasarkan pilihan centang admin (jika ada)
+                    if (soalTerpilihAdmin.length > 0) {
+                        dataSoal = data.filter(item => soalTerpilihAdmin.includes(item.id.toString()));
+                    } else {
+                        dataSoal = data;
+                    }
+
                     if (dataSoal.length === 0) {
-                        alert("Belum ada soal untuk kategori ini.");
+                        alert("Tidak ada soal aktif untuk kategori ini (mungkin belum dicentang di panel admin).");
                         return;
                     }
                     document.getElementById('login-section').classList.add('hidden');
