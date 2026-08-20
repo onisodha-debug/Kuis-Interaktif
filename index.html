@@ -32,6 +32,37 @@
             box-sizing: border-box; 
             font-size: 16px;
         }
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            height: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: #27ae60;
+            border-radius: 10px;
+            transition: width 0.4s ease;
+        }
+        .soal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .timer-box {
+            background: #e74c3c;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
         .soal-card img { 
             width: 100%; 
             border-radius: 10px; 
@@ -43,7 +74,7 @@
         }
         .soal-card label { 
             display: block; 
-            padding: 10px;
+            padding: 12px;
             margin-bottom: 8px; 
             border: 2px solid #eee;
             border-radius: 8px;
@@ -55,8 +86,17 @@
             background-color: #f8f9fa;
             border-color: #cbd5e1;
         }
-        .soal-card input[type="radio"] {
-            margin-right: 10px;
+        /* Umpan Balik Warna */
+        .correct {
+            background-color: #d4edda !important;
+            border-color: #28a745 !important;
+            color: #155724;
+            font-weight: bold;
+        }
+        .incorrect {
+            background-color: #f8d7da !important;
+            border-color: #dc3545 !important;
+            color: #721c24;
         }
         button { 
             width: 100%; 
@@ -71,49 +111,21 @@
             font-weight: bold;
             margin-top: 10px;
         }
-        button:hover { 
-            background-color: #2ecc71; 
-        }
-        /* Tombol Sekunder untuk Leaderboard */
-        .btn-secondary {
-            background-color: #3498db;
-            margin-bottom: 20px;
-        }
-        .btn-secondary:hover {
-            background-color: #2980b9;
-        }
-        .hidden {
-            display: none;
-        }
-        /* Style Tabel Leaderboard */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            margin-top: 10px;
-        }
-        th, td {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            font-size: 14px;
-        }
-        th {
-            color: #2c3e50;
-        }
-        /* Animasi Transisi Halus Estetik */
-        @keyframes fadeInSlide { 
-            from { opacity: 0; transform: translateY(15px); } 
-            to { opacity: 1; transform: translateY(0); } 
-        }
-        .animasi-transisi { 
-            animation: fadeInSlide 0.4s ease-in-out; 
-        }
+        button:hover { background-color: #2ecc71; }
+        .btn-secondary { background-color: #3498db; margin-bottom: 20px; }
+        .btn-secondary:hover { background-color: #2980b9; }
+        .hidden { display: none; }
+        table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 10px; }
+        th, td { padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; }
+        th { color: #2c3e50; }
+        @keyframes fadeInSlide { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .animasi-transisi { animation: fadeInSlide 0.4s ease-in-out; }
     </style>
 </head>
 <body>
     <h1>🎨 Kuis Seni Budaya</h1>
     
-    <!-- Bagian Pendaftaran Nama & Kelas -->
+    <!-- Bagian Login -->
     <div id="login-section" class="input-group animasi-transisi">
         <p style="margin-top:0; color:#555; text-align:center;">Masukkan identitas sebelum mulai:</p>
         <input type="text" id="nama" placeholder="Nama Lengkap" required>
@@ -121,33 +133,26 @@
         <button onclick="mulaiKuis()">Mulai Kuis 🚀</button>
     </div>
 
-    <!-- Tombol untuk Membuka Peringkat -->
     <button id="btn-toggle-leaderboard" class="btn-secondary" onclick="toggleLeaderboard()">🏆 Tampilkan Peringkat</button>
 
-    <!-- Kartu Leaderboard (Awalnya Disembunyikan) -->
+    <!-- Leaderboard -->
     <div id="leaderboard-card" class="leaderboard-card animasi-transisi hidden">
         <h3>🏆 Peringkat Teratas</h3>
         <table>
-            <thead>
-                <tr>
-                    <th>Nama</th>
-                    <th>Kelas</th>
-                    <th>Skor</th>
-                </tr>
-            </thead>
-            <tbody id="isi-leaderboard">
-                <tr><td colspan="3" style="text-align: center; color: #888;">Memuat peringkat...</td></tr>
-            </tbody>
+            <thead><tr><th>Nama</th><th>Kelas</th><th>Skor</th></tr></thead>
+            <tbody id="isi-leaderboard"><tr><td colspan="3" style="text-align: center; color: #888;">Memuat peringkat...</td></tr></tbody>
         </table>
     </div>
 
-    <!-- Bagian Kuis (Tampil Satu per Satu) -->
+    <!-- Bagian Kuis -->
     <div id="quiz-section" class="hidden">
+        <div class="progress-container">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
         <div id="soal-container"></div>
-        <button id="btn-lanjut" onclick="prosesJawaban()" class="hidden">Soal Berikutnya ➡️</button>
     </div>
 
-    <!-- Bagian Hasil Akhir -->
+    <!-- Bagian Hasil -->
     <div id="result-section" class="hidden selesai-card animasi-transisi" style="text-align: center;">
         <h2>🎉 Kuis Selesai!</h2>
         <p id="hasil-teks" style="font-size: 18px; margin: 20px 0;"></p>
@@ -155,73 +160,47 @@
     </div>
 
     <script>
-        // GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
         const API_URL = 'https://script.google.com/macros/s/AKfycbwCQiAcQz_oGypiruMPdNnpBhcdjPbwADx_jHxBGxi8zFXJhzLzCs2tdyp1CucyNvEF/exec';
         let dataSoal = [];
         let indeksSoalAktif = 0;
         let jawabanSiswa = [];
         let namaSiswa = '';
         let kelasSiswa = '';
+        let timerInterval;
+        let sisaWaktu = 25; // 25 detik per soal
 
-        // 1. Ambil Data Soal dari Google Sheets
-        fetch(API_URL)
-            .then(response => response.json())
-            .then(data => {
-                dataSoal = data;
-            })
-            .catch(error => {
-                console.error("Gagal memuat soal", error);
-            });
+        fetch(API_URL).then(res => res.json()).then(data => { dataSoal = data; });
 
-        // 2. Ambil Data Leaderboard
         function muatLeaderboard() {
-            fetch(API_URL + '?mode=leaderboard')
-                .then(res => res.json())
-                .then(data => {
-                    let rows = '';
-                    if (data.length === 0) {
-                        rows = '<tr><td colspan="3" style="text-align: center; color: #888;">Belum ada data skor.</td></tr>';
-                    } else {
-                        data.slice(0, 5).forEach(item => {
-                            rows += `<tr><td>${item.nama}</td><td>${item.kelas}</td><td><strong>${item.skor}</strong></td></tr>`;
-                        });
-                    }
-                    document.getElementById('isi-leaderboard').innerHTML = rows;
+            fetch(API_URL + '?mode=leaderboard').then(res => res.json()).then(data => {
+                let rows = data.length === 0 ? '<tr><td colspan="3" style="text-align: center; color: #888;">Belum ada data.</td></tr>' : '';
+                data.slice(0, 5).forEach(item => {
+                    rows += `<tr><td>${item.nama}</td><td>${item.kelas}</td><td><strong>${item.skor}</strong></td></tr>`;
                 });
+                document.getElementById('isi-leaderboard').innerHTML = rows;
+            });
         }
         muatLeaderboard();
 
-        // 3. Fungsi untuk Buka-Tutup (Toggle) Tampilan Leaderboard
         function toggleLeaderboard() {
             const lbCard = document.getElementById('leaderboard-card');
             const btnLb = document.getElementById('btn-toggle-leaderboard');
-            
             if (lbCard.classList.contains('hidden')) {
                 lbCard.classList.remove('hidden');
                 btnLb.innerHTML = "❌ Sembunyikan Peringkat";
-                muatLeaderboard(); // Perbarui data saat dibuka
+                muatLeaderboard();
             } else {
                 lbCard.classList.add('hidden');
                 btnLb.innerHTML = "🏆 Tampilkan Peringkat";
             }
         }
 
-        // 4. Mulai Kuis setelah mengisi nama & kelas
         function mulaiKuis() {
             namaSiswa = document.getElementById('nama').value.trim();
             kelasSiswa = document.getElementById('kelas').value.trim();
+            if (!namaSiswa || !kelasSiswa) { alert("Harap isi Nama dan Kelas!"); return; }
+            if (dataSoal.length === 0) { alert("Soal masih dimuat, tunggu sebentar."); return; }
 
-            if (!namaSiswa || !kelasSiswa) {
-                alert("Harap isi Nama dan Kelas terlebih dahulu!");
-                return;
-            }
-
-            if (dataSoal.length === 0) {
-                alert("Soal sedang dimuat atau koneksi bermasalah. Coba muat ulang halaman.");
-                return;
-            }
-
-            // Sembunyikan form login & tombol leaderboard, tampilkan area kuis
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('btn-toggle-leaderboard').classList.add('hidden');
             document.getElementById('leaderboard-card').classList.add('hidden');
@@ -230,53 +209,83 @@
             tampilkanSoal(indeksSoalAktif);
         }
 
-        // 5. Render Soal Satu per Satu dengan Animasi
         function tampilkanSoal(index) {
+            clearInterval(timerInterval);
+            sisaWaktu = 25; // Reset timer
+
+            // Update Progress Bar
+            let persentase = ((index) / dataSoal.length) * 100;
+            document.getElementById('progress-bar').style.width = persentase + '%';
+
             const item = dataSoal[index];
-            let imgTag = '';
-            if (item.gambar && item.gambar.trim() !== '') {
-                imgTag = `<img src="${item.gambar}" alt="Ilustrasi Soal">`;
-            }
+            let imgTag = (item.gambar && item.gambar.trim() !== '') ? `<img src="${item.gambar}" alt="Ilustrasi">` : '';
 
             let html = `
                 <div class="soal-card animasi-transisi">
-                    <p style="color: #666; font-size: 14px; margin-bottom: 5px;">Soal ${index + 1} dari ${dataSoal.length}</p>
+                    <div class="soal-header">
+                        <span>Soal ${index + 1} dari ${dataSoal.length}</span>
+                        <span id="timer-box" class="timer-box">⏱️ 25s</span>
+                    </div>
                     <p><strong>${item.pertanyaan}</strong></p>
                     ${imgTag}
-                    <label><input type="radio" name="pilihan" value="${item.opsi_a}" onclick="tampilkanTombolLanjut()"> ${item.opsi_a}</label>
-                    <label><input type="radio" name="pilihan" value="${item.opsi_b}" onclick="tampilkanTombolLanjut()"> ${item.opsi_b}</label>
-                    <label><input type="radio" name="pilihan" value="${item.opsi_c}" onclick="tampilkanTombolLanjut()"> ${item.opsi_c}</label>
-                    <label><input type="radio" name="pilihan" value="${item.opsi_d}" onclick="tampilkanTombolLanjut()"> ${item.opsi_d}</label>
+                    <label><input type="radio" name="pilihan" value="${item.opsi_a}" onclick="pilihJawaban(this, '${item.kunci.trim()}')"> ${item.opsi_a}</label>
+                    <label><input type="radio" name="pilihan" value="${item.opsi_b}" onclick="pilihJawaban(this, '${item.kunci.trim()}')"> ${item.opsi_b}</label>
+                    <label><input type="radio" name="pilihan" value="${item.opsi_c}" onclick="pilihJawaban(this, '${item.kunci.trim()}')"> ${item.opsi_c}</label>
+                    <label><input type="radio" name="pilihan" value="${item.opsi_d}" onclick="pilihJawaban(this, '${item.kunci.trim()}')"> ${item.opsi_d}</label>
                 </div>
             `;
-
             document.getElementById('soal-container').innerHTML = html;
-            document.getElementById('btn-lanjut').classList.add('hidden');
+            mulaiTimer();
         }
 
-        function tampilkanTombolLanjut() {
-            document.getElementById('btn-lanjut').classList.remove('hidden');
+        function mulaiTimer() {
+            const timerBox = document.getElementById('timer-box');
+            timerInterval = setInterval(() => {
+                sisaWaktu--;
+                timerBox.innerHTML = `⏱️ ${sisaWaktu}s`;
+                if (sisaWaktu <= 0) {
+                    clearInterval(timerInterval);
+                    // Jika waktu habis, anggap salah/kosong
+                    jawabanSiswa.push("");
+                    lanjutKeSoalBerikutnya();
+                }
+            }, 1000);
         }
 
-        // 6. Proses Jawaban & Pindah Soal
-        function prosesJawaban() {
-            const pilihanDipilih = document.querySelector('input[name="pilihan"]:checked');
-            if (!pilihanDipilih) {
-                alert("Pilih salah satu jawaban terlebih dahulu!");
-                return;
-            }
+        function pilihJawaban(element, kunciJawaban) {
+            clearInterval(timerInterval); // Hentikan timer saat dijawab
+            
+            const pilihanSiswa = element.value.trim();
+            jawabanSiswa.push(pilihanSiswa);
 
-            jawabanSiswa.push(pilihanDipilih.value.trim());
+            // Berikan Umpan Balik Instan (Warna)
+            const labels = document.querySelectorAll('.soal-card label');
+            labels.forEach(label => {
+                const radio = label.querySelector('input');
+                radio.disabled = true; // Kunci semua pilihan
+                if (radio.value.trim() === kunciJawaban) {
+                    label.classList.add('correct'); // Hijau untuk jawaban benar
+                } else if (radio === element && pilihanSiswa !== kunciJawaban) {
+                    label.classList.add('incorrect'); // Merah jika pilihan user salah
+                }
+            });
+
+            // Tunggu 1.5 detik lalu lanjut otomatis
+            setTimeout(() => {
+                lanjutKeSoalBerikutnya();
+            }, 1500);
+        }
+
+        function lanjutKeSoalBerikutnya() {
             indeksSoalAktif++;
-
             if (indeksSoalAktif < dataSoal.length) {
                 tampilkanSoal(indeksSoalAktif);
             } else {
+                document.getElementById('progress-bar').style.width = '100%';
                 hitungDanKirimHasil();
             }
         }
 
-        // 7. Hitung Skor & Kirim ke Google Sheets
         function hitungDanKirimHasil() {
             let totalBenar = 0;
             const poinPerSoal = 100 / dataSoal.length;
@@ -294,16 +303,10 @@
             resultSection.classList.remove('hidden');
             document.getElementById('hasil-teks').innerHTML = `Halo <strong>${namaSiswa}</strong> (${kelasSiswa}),<br> Skor akhir Anda adalah: <span style="font-size: 28px; color: #27ae60; font-weight: bold;">${skorAkhir}</span>`;
 
-            const payload = {
-                nama: namaSiswa,
-                kelas: kelasSiswa,
-                skor: skorAkhir
-            };
-
             fetch(API_URL, {
                 method: 'POST',
                 mode: 'no-cors',
-                body: JSON.stringify(payload)
+                body: JSON.stringify({ nama: namaSiswa, kelas: kelasSiswa, skor: skorAkhir })
             }).then(() => {
                 setTimeout(muatLeaderboard, 1500);
             });
