@@ -1,15 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Kuis Interaktif</title>
+    <title>Kuis Pintar</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        .soal-card { border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; }
+        body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; }
+        .input-group { margin-bottom: 20px; }
+        .soal-card { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 8px; }
     </style>
 </head>
 <body>
     <h1>Kuis Pintar</h1>
+    
+    <div class="input-group">
+        <input type="text" id="nama" placeholder="Nama Lengkap" required><br>
+        <input type="text" id="kelas" placeholder="Kelas" required>
+    </div>
+
     <div id="app">Memuat soal...</div>
+    
+    <button onclick="kirimHasil()">Kirim Jawaban</button>
 
     <script>
         // GANTI DENGAN URL WEB APP ANDA
@@ -19,15 +28,30 @@
             .then(response => response.json())
             .then(data => {
                 let html = '';
-                data.forEach(item => {
+                data.forEach((item, index) => {
                     html += `<div class="soal-card">
                         <p>${item.id}. ${item.pertanyaan}</p>
-                        <button>${item.opsi_a}</button>
-                        <button>${item.opsi_b}</button>
+                        <input type="radio" name="soal${index}" value="${item.opsi_a}"> ${item.opsi_a}<br>
+                        <input type="radio" name="soal${index}" value="${item.opsi_b}"> ${item.opsi_b}<br>
                     </div>`;
                 });
                 document.getElementById('app').innerHTML = html;
             });
+
+        function kirimHasil() {
+            // Kita akan isi logika perbandingan jawaban di sini nanti
+            const payload = {
+                nama: document.getElementById('nama').value,
+                kelas: document.getElementById('kelas').value,
+                skor: 0 // Sementara 0
+            };
+
+            fetch(API_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Penting untuk bypass error CORS di Apps Script
+                body: JSON.stringify(payload)
+            }).then(() => alert("Data berhasil dikirim!"));
+        }
     </script>
 </body>
 </html>
