@@ -5,14 +5,18 @@
     <style>
         body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; }
         .input-group { margin-bottom: 20px; }
-        .soal-card { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 8px; }
+        .input-group input { width: 100%; padding: 8px; margin-bottom: 8px; box-sizing: border-box; }
+        .soal-card { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 8px; text-align: left; }
+        .soal-card label { display: block; margin-bottom: 6px; cursor: pointer; }
+        button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
     </style>
 </head>
 <body>
     <h1>Kuis Pintar</h1>
     
     <div class="input-group">
-        <input type="text" id="nama" placeholder="Nama Lengkap" required><br>
+        <input type="text" id="nama" placeholder="Nama Lengkap" required>
         <input type="text" id="kelas" placeholder="Kelas" required>
     </div>
 
@@ -23,34 +27,65 @@
     <script>
         // GANTI DENGAN URL WEB APP ANDA
         const API_URL = 'https://script.google.com/macros/s/AKfycbwCQiAcQz_oGypiruMPdNnpBhcdjPbwADx_jHxBGxi8zFXJhzLzCs2tdyp1CucyNvEF/exec';
+        let dataSoal = [];
 
+        // 1. Mengambil data soal dari Apps Script
         fetch(API_URL)
             .then(response => response.json())
             .then(data => {
+                dataSoal = data; // Simpan data soal ke variabel global
                 let html = '';
+                
                 data.forEach((item, index) => {
                     html += `<div class="soal-card">
-                        <p>${item.id}. ${item.pertanyaan}</p>
-                        <input type="radio" name="soal${index}" value="${item.opsi_a}"> ${item.opsi_a}<br>
-                        <input type="radio" name="soal${index}" value="${item.opsi_b}"> ${item.opsi_b}<br>
+                        <p><strong>${item.id}. ${item.pertanyaan}</strong></p>
+                        <label><input type="radio" name="soal${index}" value="${item.opsi_a}"> ${item.opsi_a}</label>
+                        <label><input type="radio" name="soal${index}" value="${item.opsi_b}"> ${item.opsi_b}</label>
+                        <label><input type="radio" name="soal${index}" value="${item.opsi_c}"> ${item.opsi_c}</label>
+                        <label><input type="radio" name="soal${index}" value="${item.opsi_d}"> ${item.opsi_d}</label>
                     </div>`;
                 });
+                
                 document.getElementById('app').innerHTML = html;
             });
 
+        // 2. Logika Menghitung Skor dan Mengirim Hasil
         function kirimHasil() {
-            // Kita akan isi logika perbandingan jawaban di sini nanti
+            const nama = document.getElementById('nama').value;
+            const kelas = document.getElementById('kelas').value;
+
+            if (!nama || !kelas) {
+                alert("Harap isi Nama dan Kelas terlebih dahulu!");
+                return;
+            }
+
+            let totalBenar = 0;
+            const poinPerSoal = 100 / dataSoal.length; // Otomatis menyesuaikan jumlah soal
+
+            // Membandingkan jawaban pilihan siswa dengan Kunci Jawaban
+            dataSoal.forEach((item, index) => {
+                const pilihan = document.querySelector(`input[name="soal${index}"]:checked`);
+                if (pilihan && pilihan.value === item.kunci) {
+                    totalBenar++;
+                }
+            });
+
+            const skorAkhir = totalBenar * poinPerSoal;
+
+            // Mengirim data ke Google Sheets
             const payload = {
-                nama: document.getElementById('nama').value,
-                kelas: document.getElementById('kelas').value,
-                skor: 0 // Sementara 0
+                nama: nama,
+                kelas: kelas,
+                skor: skorAkhir
             };
 
             fetch(API_URL, {
                 method: 'POST',
-                mode: 'no-cors', // Penting untuk bypass error CORS di Apps Script
+                mode: 'no-cors',
                 body: JSON.stringify(payload)
-            }).then(() => alert("Data berhasil dikirim!"));
+            }).then(() => {
+                alert(`Kuis Selesai!\n\nNama: ${nama}\nSkor Anda: ${skorAkhir}`);
+            });
         }
     </script>
 </body>
