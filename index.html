@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kuis Interaktif</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .soal-card { border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Kuis Pintar</h1>
+    <div id="app">Memuat soal...</div>
+
+    <script>
+        // GANTI DENGAN URL WEB APP ANDA
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwCQiAcQz_oGypiruMPdNnpBhcdjPbwADx_jHxBGxi8zFXJhzLzCs2tdyp1CucyNvEF/exec';
+
+        fetch(API_URL)
+            .then(response => response.json())
+            .then(data => {
+                let html = '';
+                data.forEach(item => {
+                    html += `<div class="soal-card">
+                        <p>${item.id}. ${item.pertanyaan}</p>
+                        <button>${item.opsi_a}</button>
+                        <button>${item.opsi_b}</button>
+                    </div>`;
+                });
+                document.getElementById('app').innerHTML = html;
+            });
+    </script>
+</body>
+</html>
