@@ -62,6 +62,9 @@
     <!-- Leaderboard Card -->
     <div id="leaderboard-card" class="card animasi hidden">
         <h3>🏆 Peringkat Teratas</h3>
+        <select id="filter-lb-kategori" onchange="muatLeaderboard()" style="margin-bottom: 15px;">
+            <option value="">Semua Kategori</option>
+        </select>
         <table>
             <thead><tr><th>Nama</th><th>Kelas</th><th>Skor</th></tr></thead>
             <tbody id="isi-leaderboard"><tr><td colspan="3" style="text-align: center; color: #888;">Memuat...</td></tr></tbody>
@@ -122,7 +125,7 @@
         let dataSoal = [];
         let indeksSoalAktif = 0;
         let jawabanSiswa = [];
-        let namaSiswa = '', kelasSiswa = '';
+        let namaSiswa = '', kelasSiswa = '', kategoriAktif = '';
         let timerInterval, sisaWaktu = 25;
 
         function muatKategoriOtomatis() {
@@ -135,13 +138,18 @@
                 });
 
                 let selectSiswa = document.getElementById('pilih-kategori');
+                let selectFilterLb = document.getElementById('filter-lb-kategori');
                 let optionsHtml = '';
+                let filterHtml = '<option value="">Semua Kategori</option>';
+
                 setKategori.forEach(kat => {
                     optionsHtml += `<option value="${kat}">${kat}</option>`;
+                    filterHtml += `<option value="${kat}">${kat}</option>`;
                 });
 
                 if (setKategori.size > 0) {
                     selectSiswa.innerHTML = optionsHtml;
+                    selectFilterLb.innerHTML = filterHtml;
                 }
             }).catch(err => {
                 console.error("Gagal memuat kategori:", err);
@@ -150,7 +158,13 @@
         muatKategoriOtomatis();
 
         function muatLeaderboard() {
-            fetch(API_URL + '?mode=leaderboard').then(res => res.json()).then(data => {
+            const kategoriPilih = document.getElementById('filter-lb-kategori').value;
+            let url = API_URL + '?mode=leaderboard';
+            if (kategoriPilih) {
+                url += `&kategori=${encodeURIComponent(kategoriPilih)}`;
+            }
+
+            fetch(url).then(res => res.json()).then(data => {
                 let rows = data.length === 0 ? '<tr><td colspan="3" style="text-align: center; color: #888;">Belum ada data.</td></tr>' : '';
                 data.slice(0, 5).forEach(item => {
                     rows += `<tr><td>${item.nama}</td><td>${item.kelas}</td><td><strong>${item.skor}</strong></td></tr>`;
@@ -179,7 +193,7 @@
 
         function verifikasiAdmin() {
             const pass = document.getElementById('admin-pass').value;
-            if (pass === 'admin123') { // Ganti password admin di sini jika perlu
+            if (pass === 'admin123') {
                 document.getElementById('admin-login-section').classList.add('hidden');
                 document.getElementById('admin-panel-section').classList.remove('hidden');
             } else {
@@ -226,14 +240,14 @@
         }
 
         function mulaiKuis() {
-            const kategori = document.getElementById('pilih-kategori').value;
+            kategoriAktif = document.getElementById('pilih-kategori').value;
             namaSiswa = document.getElementById('nama').value.trim();
             kelasSiswa = document.getElementById('kelas').value.trim();
 
             if (!namaSiswa || !kelasSiswa) { alert("Harap isi Nama dan Kelas!"); return; }
-            if (!kategori) { alert("Pilih kategori terlebih dahulu!"); return; }
+            if (!kategoriAktif) { alert("Pilih kategori terlebih dahulu!"); return; }
 
-            fetch(API_URL + `?mode=soal&kategori=${encodeURIComponent(kategori)}`)
+            fetch(API_URL + `?mode=soal&kategori=${encodeURIComponent(kategoriAktif)}`)
                 .then(res => res.json())
                 .then(data => {
                     dataSoal = data;
@@ -328,12 +342,12 @@
 
             document.getElementById('quiz-section').classList.add('hidden');
             document.getElementById('result-section').classList.remove('hidden');
-            document.getElementById('hasil-teks').innerHTML = `Halo <strong>${namaSiswa}</strong> (${kelasSiswa}),<br> Skor akhir Anda: <span style="font-size: 28px; color: #27ae60; font-weight: bold;">${skorAkhir}</span>`;
+            document.getElementById('hasil-teks').innerHTML = `Halo <strong>${namaSiswa}</strong> (${kelasSiswa}),<br> Skor Kategori <strong>${kategoriAktif}</strong> Anda: <span style="font-size: 28px; color: #27ae60; font-weight: bold;">${skorAkhir}</span>`;
 
             fetch(API_URL, {
                 method: 'POST',
                 mode: 'no-cors',
-                body: JSON.stringify({ nama: namaSiswa, kelas: kelasSiswa, skor: skorAkhir })
+                body: JSON.stringify({ nama: namaSiswa, kelas: kelasSiswa, kategori: kategoriAktif, skor: skorAkhir })
             }).then(() => { setTimeout(muatLeaderboard, 1500); });
         }
     </script>
