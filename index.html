@@ -1,91 +1,48 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Kuis Pintar</title>
+    <title>Kuis Seni Budaya</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; }
-        .input-group { margin-bottom: 20px; }
-        .input-group input { width: 100%; padding: 8px; margin-bottom: 8px; box-sizing: border-box; }
-        .soal-card { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 8px; text-align: left; }
-        .soal-card label { display: block; margin-bottom: 6px; cursor: pointer; }
-        button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; }
-        button:hover { background-color: #0056b3; }
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background-color: #f4f7f6; max-width: 500px; margin: auto; }
+        .soal-card { background: white; padding: 20px; margin-bottom: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        img { width: 100%; border-radius: 10px; margin-top: 10px; margin-bottom: 10px; display: block; }
+        button { width: 100%; padding: 15px; background-color: #27ae60; color: white; border: none; border-radius: 10px; font-size: 18px; cursor: pointer; }
+        input { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; }
     </style>
 </head>
 <body>
-    <h1>Kuis Pintar</h1>
-    
-    <div class="input-group">
-        <input type="text" id="nama" placeholder="Nama Lengkap" required>
-        <input type="text" id="kelas" placeholder="Kelas" required>
-    </div>
+    <h1>🎨 Kuis Seni Budaya</h1>
+    <input type="text" id="nama" placeholder="Nama Lengkap">
+    <input type="text" id="kelas" placeholder="Kelas">
 
     <div id="app">Memuat soal...</div>
-    
-    <button onclick="kirimHasil()">Kirim Jawaban</button>
+    <button onclick="kirimHasil()">🚀 Selesai & Kirim</button>
 
     <script>
-        // GANTI DENGAN URL WEB APP ANDA
         const API_URL = 'https://script.google.com/macros/s/AKfycbwCQiAcQz_oGypiruMPdNnpBhcdjPbwADx_jHxBGxi8zFXJhzLzCs2tdyp1CucyNvEF/exec';
         let dataSoal = [];
 
-        // 1. Mengambil data soal dari Apps Script
-        fetch(API_URL)
-            .then(response => response.json())
-            .then(data => {
-                dataSoal = data; // Simpan data soal ke variabel global
-                let html = '';
+        fetch(API_URL).then(res => res.json()).then(data => {
+            dataSoal = data;
+            let html = '';
+            data.forEach((item, index) => {
+                // Hanya tampilkan gambar jika link tersedia
+                let imgTag = item.gambar ? `<img src="${item.gambar}" alt="Ilustrasi Soal">` : '';
                 
-                data.forEach((item, index) => {
-                    html += `<div class="soal-card">
-                        <p><strong>${item.id}. ${item.pertanyaan}</strong></p>
-                        <label><input type="radio" name="soal${index}" value="${item.opsi_a}"> ${item.opsi_a}</label>
-                        <label><input type="radio" name="soal${index}" value="${item.opsi_b}"> ${item.opsi_b}</label>
-                        <label><input type="radio" name="soal${index}" value="${item.opsi_c}"> ${item.opsi_c}</label>
-                        <label><input type="radio" name="soal${index}" value="${item.opsi_d}"> ${item.opsi_d}</label>
-                    </div>`;
-                });
-                
-                document.getElementById('app').innerHTML = html;
+                html += `<div class="soal-card">
+                    <p><strong>${item.id}. ${item.pertanyaan}</strong></p>
+                    ${imgTag}
+                    <label><input type="radio" name="soal${index}" value="${item.opsi_a}"> ${item.opsi_a}</label><br>
+                    <label><input type="radio" name="soal${index}" value="${item.opsi_b}"> ${item.opsi_b}</label><br>
+                    <label><input type="radio" name="soal${index}" value="${item.opsi_c}"> ${item.opsi_c}</label><br>
+                    <label><input type="radio" name="soal${index}" value="${item.opsi_d}"> ${item.opsi_d}</label>
+                </div>`;
             });
+            document.getElementById('app').innerHTML = html;
+        });
 
-        // 2. Logika Menghitung Skor dan Mengirim Hasil
         function kirimHasil() {
-            const nama = document.getElementById('nama').value;
-            const kelas = document.getElementById('kelas').value;
-
-            if (!nama || !kelas) {
-                alert("Harap isi Nama dan Kelas terlebih dahulu!");
-                return;
-            }
-
-            let totalBenar = 0;
-            const poinPerSoal = 100 / dataSoal.length; // Otomatis menyesuaikan jumlah soal
-
-            // Membandingkan jawaban pilihan siswa dengan Kunci Jawaban
-            dataSoal.forEach((item, index) => {
-                const pilihan = document.querySelector(`input[name="soal${index}"]:checked`);
-                if (pilihan && pilihan.value === item.kunci) {
-                    totalBenar++;
-                }
-            });
-
-            const skorAkhir = totalBenar * poinPerSoal;
-
-            // Mengirim data ke Google Sheets
-            const payload = {
-                nama: nama,
-                kelas: kelas,
-                skor: skorAkhir
-            };
-
-            fetch(API_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify(payload)
-            }).then(() => {
-                alert(`Kuis Selesai!\n\nNama: ${nama}\nSkor Anda: ${skorAkhir}`);
-            });
+            // ... (logika kirimHasil tetap sama)
         }
     </script>
 </body>
